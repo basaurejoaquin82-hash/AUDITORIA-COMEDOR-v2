@@ -1,4 +1,7 @@
 streamlit
+streamlit-aggrid
+streamlit-option-menu
 st-gsheets-connection
 plotly
 pandas
+numpy
