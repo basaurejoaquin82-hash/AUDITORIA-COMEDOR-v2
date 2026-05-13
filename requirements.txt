@@ -4,4 +4,3 @@ streamlit-option-menu
 st-gsheets-connection
 plotly
 pandas
-numpy
