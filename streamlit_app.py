@@ -81,8 +81,13 @@ st.markdown("""
 # =========================================================
 # 3. ACCESO / LOGIN (SIDEBAR)
 # =========================================================
+# =========================================================
+# 3. ACCESO / LOGIN (SIDEBAR)
+# =========================================================
 with st.sidebar:
+    # Asegúrate de que la URL esté completa y cerrada con comillas
     st.image("https://upload.wikimedia.org/wikipedia/commons/7/75/Coat_of_arms_of_Argentina.svg", width=100)
+    
     st.markdown("## Acceso Institucional")
     usuario = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
