@@ -116,7 +116,7 @@ st.markdown(f"""
 
 selected = option_menu(
     menu_title=None,
-    options=["Dashboard Ejecutivo", "Auditoría Detallada", "Analítica de Proveedores", "Configuración"],
+    options=["Dashboard Ejecutivo", "Auditoría Detallada", "Consumo por sector", "Configuración"],
     icons=["speedometer2", "shield-lock", "graph-up-arrow", "gear"],
     menu_icon="cast",
     default_index=0,
@@ -228,7 +228,7 @@ elif selected == "Auditoría Detallada":
 # =========================================================
 # VISTA: ANALÍTICA (SANKEY / DRILL-DOWN)
 # =========================================================
-elif selected == "Analítica de Proveedores":
+elif selected == "Consumo por sector":
     st.subheader("📊 Análisis de Flujo y Patrones de Consumo")
     
     # Sankey Diagram (Flujo Sector -> Plato)
