@@ -78,7 +78,7 @@ def login():
         token = st.text_input("Token de Acceso (RSA)", type="password")
         
         if st.button("Sincronizar", use_container_width=True):
-            if user == "admin" and token == "1234":
+            if user == "bassaure" and token == "91218":
                 st.session_state.auth = True
                 st.rerun()
             else:
