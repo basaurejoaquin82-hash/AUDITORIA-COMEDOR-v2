@@ -29,7 +29,6 @@ def apply_design_system():
 
         .stApp { background-color: var(--bg-body); font-family: 'Outfit', sans-serif; }
         
-        /* Contenedores Estilo Home Banking */
         .glass-card {
             background: white;
             padding: 24px;
@@ -39,16 +38,13 @@ def apply_design_system():
             margin-bottom: 20px;
         }
 
-        /* Navbar Lateral y Superior */
         header[data-testid="stHeader"] { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
         
-        /* Métricas Premium */
         .metric-label { color: #667085; font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; }
         .metric-value { color: var(--primary); font-size: 1.8rem; font-weight: 700; }
         .metric-delta { font-size: 0.85rem; font-weight: 600; }
         .delta-up { color: var(--success); }
 
-        /* Botones y Inputs */
         .stButton>button {
             border-radius: 8px;
             background-color: var(--primary);
@@ -89,19 +85,30 @@ if not st.session_state.auth:
     login()
     st.stop()
 
-# --- 4. ENGINE DE DATOS (GOOGLE SHEETS) ---
+# --- 4. ENGINE DE DATOS (GOOGLE SHEETS) CON CORRECCIÓN ---
 @st.cache_data(ttl=300)
 def load_data():
     url = "https://docs.google.com/spreadsheets/d/1lqX4uss9CdW-QUqPlaBnvWoMePzuaBQ-89cfu7cDi3A/edit#gid=0"
     conn = st.connection("gsheets", type=GSheetsConnection)
     data = conn.read(spreadsheet=url)
-    data.columns = data.columns.str.strip()
-    data['Marca temporal'] = pd.to_datetime(data['Marca temporal'], errors='coerce')
+    
+    # Limpieza profunda de nombres de columnas (espacios y saltos de línea)
+    data.columns = data.columns.str.strip().str.replace('\n', ' ', regex=False)
+    
+    # Validación de columna para evitar KeyError
+    col_fecha = 'Marca temporal'
+    if col_fecha in data.columns:
+        data[col_fecha] = pd.to_datetime(data[col_fecha], errors='coerce')
+    else:
+        st.error(f"⚠️ Error Crítico: No se encontró la columna '{col_fecha}'.")
+        st.info(f"Columnas disponibles: {', '.join(data.columns)}")
+        st.stop()
+        
     return data
 
 df_raw = load_data()
 
-# --- 5. NAVEGACIÓN TIPO APP BANCARIA ---
+# --- 5. NAVEGACIÓN ---
 with st.sidebar:
     st.markdown("### 🏛️ Control Central")
     menu = option_menu(
@@ -124,27 +131,24 @@ with st.sidebar:
 if menu == "Dashboard":
     st.markdown("## Resumen Ejecutivo de Gestión")
     
-    # KPIs con porcentajes de variación reales/simulados
     m1, m2, m3, m4 = st.columns(4)
     with m1:
         st.markdown(f"""<div class="glass-card"><p class="metric-label">Transacciones Totales</p><p class="metric-value">{len(df_raw)}</p><p class="metric-delta delta-up">↑ 12% vs mes ant.</p></div>""", unsafe_allow_html=True)
     with m2:
-        top_val = df_raw['Sector'].mode()[0]
+        top_val = df_raw['Sector'].mode()[0] if not df_raw['Sector'].empty else "N/A"
         st.markdown(f"""<div class="glass-card"><p class="metric-label">Sector Dominante</p><p class="metric-value" style="font-size:1.4rem;">{top_val}</p><p class="metric-delta">Consumo Crítico</p></div>""", unsafe_allow_html=True)
     with m3:
         st.markdown(f"""<div class="glass-card"><p class="metric-label">Eficiencia Operativa</p><p class="metric-value">98.4%</p><p class="metric-delta delta-up">↑ 0.5%</p></div>""", unsafe_allow_html=True)
     with m4:
         st.markdown(f"""<div class="glass-card"><p class="metric-label">Latencia de Datos</p><p class="metric-value">0.4s</p><p class="metric-delta">Óptimo</p></div>""", unsafe_allow_html=True)
 
-    # Gráficos Interactivos Profesionales
     col_left, col_right = st.columns([1.5, 1])
     
     with col_left:
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.markdown("#### Análisis de Tendencia Temporal")
         df_time = df_raw.groupby(df_raw['Marca temporal'].dt.date).size().reset_index(name='Registros')
-        fig_line = px.area(df_time, x='Marca temporal', y='Registros', 
-                          color_discrete_sequence=['#101828'])
+        fig_line = px.area(df_time, x='Marca temporal', y='Registros', color_discrete_sequence=['#101828'])
         fig_line.update_layout(hovermode="x unified", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_line, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -152,22 +156,16 @@ if menu == "Dashboard":
     with col_right:
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.markdown("#### Distribución por Categoría")
-        fig_sun = px.sunburst(df_raw, path=['Sector', 'Principal/minutas'], 
-                             color_discrete_sequence=px.colors.sequential.YlGnBu)
+        fig_sun = px.sunburst(df_raw, path=['Sector', 'Principal/minutas'], color_discrete_sequence=px.colors.sequential.YlGnBu)
         st.plotly_chart(fig_sun, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif menu == "Trazabilidad":
     st.markdown("## Registro de Auditoría en Tiempo Real")
     
-    # Filtro avanzado
-    search_col, filter_col = st.columns([2, 1])
-    with search_col:
-        query = st.text_input("🔍 Búsqueda Global de Registros", placeholder="ID, Sector o Producto...")
-    
+    query = st.text_input("🔍 Búsqueda Global de Registros", placeholder="ID, Sector o Producto...")
     df_filtered = df_raw[df_raw.astype(str).apply(lambda x: x.str.contains(query, case=False)).any(axis=1)] if query else df_raw
     
-    # AgGrid Configuración Estilo Bloomberg
     gb = GridOptionsBuilder.from_dataframe(df_filtered)
     gb.configure_default_column(resizable=True, filterable=True, sortable=True, editable=False)
     gb.configure_pagination(paginationAutoPageSize=True)
@@ -179,7 +177,7 @@ elif menu == "Trazabilidad":
     AgGrid(
         df_filtered,
         gridOptions=grid_opt,
-        theme='balham',  # Más compacto y profesional
+        theme='balham',
         columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
         height=600,
         allow_unsafe_jscode=True
@@ -190,19 +188,16 @@ elif menu == "Configuración":
     with st.expander("🛠️ Parámetros de Interfaz", expanded=True):
         st.toggle("Modo Oscuro de Alto Contraste", False)
         st.select_slider("Frecuencia de Refresco de Datos", options=["1m", "5m", "15m", "1h"], value="5m")
-        st.color_picker("Color Primario Institucional", "#101828")
         
     with st.expander("🔐 Seguridad y Accesos"):
-        st.info("La terminal está operando bajo encriptación SSL de 256 bits.")
         if st.button("Cerrar Sesión Global"):
             st.session_state.auth = False
             st.rerun()
 
-# --- 7. FOOTER BANCARIO ---
+# --- 7. FOOTER ---
 st.markdown(f"""
     <div style="text-align:center; padding: 40px; color: #98A2B3; font-size: 0.8rem;">
-        SISTEMA DE AUDITORÍA PRESIDENCIAL | ESTACIÓN: {st.session_state.get('user', 'LOCAL')} | 
-        COORDENADAS: {st.session_state.get('geo', '-34.6083, -58.3703')}<br>
+        SISTEMA DE AUDITORÍA PRESIDENCIAL | ESTACIÓN: CR-A04<br>
         © 2026 CASA ROSADA - PROYECTO AUDITORÍA FEDERAL
     </div>
 """, unsafe_allow_html=True)
