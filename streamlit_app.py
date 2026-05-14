@@ -142,8 +142,8 @@ if menu == "Dashboard":
     with col_left:
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.markdown("#### Análisis de Tendencia Temporal")
-        df_time = df_raw.groupby(df_raw['fecha'].dt.date).size().reset_index(name='Registros')
-        fig_line = px.area(df_time, x='fecha', y='Registros', 
+        df_time = df_raw.groupby(df_raw['Marca temporal'].dt.date).size().reset_index(name='Registros')
+        fig_line = px.area(df_time, x='Marca temporal', y='Registros', 
                           color_discrete_sequence=['#101828'])
         fig_line.update_layout(hovermode="x unified", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_line, use_container_width=True)
