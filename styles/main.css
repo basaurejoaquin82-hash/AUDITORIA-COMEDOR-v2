@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary: #101828;
+    --accent-gold: #C5A059;
+    --success: #12B76A;
+    --bg-body: #F9FAFB;
+}
+
+.stApp {
+    background-color: var(--bg-body);
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Contenedores */
+.glass-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #EAECF0;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+/* Navbar */
+header[data-testid="stHeader"] {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+}
+
+/* Métricas */
+.metric-label {
+    color: #667085;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    color: var(--primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.metric-delta {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.delta-up {
+    color: var(--success);
+}
+
+/* Botones */
+.stButton>button {
+    border-radius: 8px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    transition: all 0.3s;
+}
+
+.stButton>button:hover {
+    background-color: var(--accent-gold);
+    border: none;
+}
